@@ -1,0 +1,84 @@
+import math
+import numpy 
+from scipy import integrate
+import matplotlib.pyplot as plt
+
+
+p = 1.340
+K = 2
+T = 2
+w = 2 * math.pi /T
+
+
+
+
+def getW0(t):
+  return p*t**2
+def getWa1(t):
+  return getW0(t) * math.cos(w*t)
+def getWa2(t):
+  return getW0(t) * math.cos(w*t*2)
+def getWb1(t):
+  return getW0(t) * math.sin(w*t)
+def getWb2(t):
+  return getW0(t) * math.sin(w*t*2)
+
+
+a0 = 1 / T * integrate.quad(getW0, -1,1)[0]
+ak1 = 2 / T * integrate.quad(getWa1, -1,1)[0]
+ak2 = 2 / T * integrate.quad(getWa2, -1,1)[0]
+bk1 = 2 / T * integrate.quad(getWb1, -1,1)[0]
+bk2 = 2 / T * integrate.quad(getWb2, -1,1)[0]
+
+print("a0 =",a0 )
+print("ak1 = ",ak1)
+print("ak2 =" ,ak2)
+print("bk1 =" , bk1)
+print("bk2 =",bk2)
+
+def fourier(t):
+  return a0+(ak1*math.cos(w*t)+bk1*math.sin(w*t)) + (ak2*math.cos(w*t*2)+bk2*math.sin(w*t*2))
+print(fourier(0))
+
+
+
+t = numpy.linspace(-1, 1, 100)
+f = numpy.vectorize(fourier)
+fig = plt.figure()
+ax = fig.add_subplot()
+ax.plot(t,f(t))
+plt.show()
+
+
+
+import sympy
+
+
+tSymbol = sympy.Symbol('t')
+a_sym = sympy.Symbol('a')
+b_sym = sympy.Symbol('b')
+c_sym = sympy.Symbol('c')
+
+fun = a0 + ak1*sympy.cos(w*tSymbol)+ ak2*sympy.cos(w*tSymbol*2)
+
+
+polynomial = a_sym *tSymbol**2 + b_sym *tSymbol + c_sym
+print(polynomial)
+
+energy_diference = sympy.integrate((fun-polynomial)**2, (tSymbol, -1, 1))
+
+energy_a = sympy.diff(energy_diference, a_sym)
+energy_b = sympy.diff(energy_diference, b_sym)
+energy_c = sympy.diff(energy_diference, c_sym)
+
+
+print('energy_a =' ,energy_a)
+print('energy_b =', energy_b)
+print('energy_c =', energy_c)
+
+
+energy_a = sympy.diff(energy_diference, a_sym)
+solution = sympy.solve([energy_a, energy_b, energy_c],(a_sym, b_sym, c_sym))
+
+print("rozwiązanie")
+print(solution)
